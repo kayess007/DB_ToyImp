@@ -2332,9 +2332,22 @@ CANONICAL_MAP = {
     "GR:1": "GAMMA_RAY",
     "GR:2": "GAMMA_RAY",
     "GR:3": "GAMMA_RAY",
+    "GR": "GAMMA_RAY",
+    "GRC": "GAMMA_RAY",
+    "GRS": "GAMMA_RAY",
 
     # Density
     "RHOB": "BULK_DENSITY",
+
+    # -----------------------------
+    # SONIC / ACOUSTIC / TRANSIT TIME
+    # -----------------------------
+    "DT": "DT_COMPRESSIONAL",
+    "DTCO": "DT_COMPRESSIONAL",
+    "DTC": "DT_COMPRESSIONAL",
+    "DTSM": "DT_SHEAR",
+    "DTS": "DT_SHEAR",
+    "DSOZ": "DT_SHEAR",
 
     # Neutron porosity
     "TNPH": "NEUTRON_POROSITY",
@@ -2353,6 +2366,15 @@ CANONICAL_MAP = {
     "VIB_LAT": "VIBRATION",
     "VIB_TOR": "VIBRATION",
     "VIB_X": "VIBRATION",
+    
+    # Depth
+    'DEP' : 'DEPTH',
+    'DEPT' : 'DEPTH',
+    'DEPTH' : 'DEPTH',
+    
+    'DMEA': 'MEASURED_DEPTH',
+    "TVD":   "TRUE_VERTICAL_DEPTH",   
+    "TVDSS": "TRUE_VERTICAL_DEPTH_SS" 
 }
 
 
