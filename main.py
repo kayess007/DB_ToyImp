@@ -2332,9 +2332,22 @@ CANONICAL_MAP = {
     "GR:1": "GAMMA_RAY",
     "GR:2": "GAMMA_RAY",
     "GR:3": "GAMMA_RAY",
+    "GR": "GAMMA_RAY",
+    "GRC": "GAMMA_RAY",
+    "GRS": "GAMMA_RAY",
 
     # Density
     "RHOB": "BULK_DENSITY",
+
+    # -----------------------------
+    # SONIC / ACOUSTIC / TRANSIT TIME
+    # -----------------------------
+    "DT": "DT_COMPRESSIONAL",
+    "DTCO": "DT_COMPRESSIONAL",
+    "DTC": "DT_COMPRESSIONAL",
+    "DTSM": "DT_SHEAR",
+    "DTS": "DT_SHEAR",
+    "DSOZ": "DT_SHEAR",
 
     # Neutron porosity
     "TNPH": "NEUTRON_POROSITY",
@@ -2353,23 +2366,66 @@ CANONICAL_MAP = {
     "VIB_LAT": "VIBRATION",
     "VIB_TOR": "VIBRATION",
     "VIB_X": "VIBRATION",
+    
+    # Depth
+    'DEP' : 'DEPTH',
+    'DEPT' : 'DEPTH',
+    'DEPTH' : 'DEPTH',
+    
+    'DMEA': 'MEASURED_DEPTH',
+    "TVD":   "TRUE_VERTICAL_DEPTH",   
+    "TVDSS": "TRUE_VERTICAL_DEPTH_SS" 
 }
 
+
+# def canonical_to_family(canonical: str | None) -> str | None:
+#     """Map canonical_name to a human-readable family label."""
+#     if canonical is None:
+#         return None
+#     if canonical.startswith("GAMMA_RAY"):
+#         return "Gamma ray"
+#     if canonical == "BULK_DENSITY":
+#         return "Density"
+#     if canonical == "NEUTRON_POROSITY":
+#         return "Porosity"
+#     if canonical in ("BIT_RESISTIVITY",):
+#         return "Resistivity"
+#     if canonical in ("DRILLING_RATE", "ROTARY_SPEED", "VIBRATION"):
+#         return "Drilling dynamics"
+#     return None
 
 def canonical_to_family(canonical: str | None) -> str | None:
     """Map canonical_name to a human-readable family label."""
     if canonical is None:
         return None
+
+    # Gamma ray
     if canonical.startswith("GAMMA_RAY"):
         return "Gamma ray"
+
+    # Density
     if canonical == "BULK_DENSITY":
         return "Density"
+
+    # Sonic
+    if canonical in ("DT_COMPRESSIONAL", "DT_SHEAR"):
+        return "Sonic"
+
+    # Neutron
     if canonical == "NEUTRON_POROSITY":
         return "Porosity"
-    if canonical in ("BIT_RESISTIVITY",):
+
+    # Resistivity
+    if canonical == "BIT_RESISTIVITY":
         return "Resistivity"
+
+    # Drilling dynamics
     if canonical in ("DRILLING_RATE", "ROTARY_SPEED", "VIBRATION"):
         return "Drilling dynamics"
+
+    # Depth family
+    if canonical in ("DEPTH", "MEASURED_DEPTH", "TRUE_VERTICAL_DEPTH", "TRUE_VERTICAL_DEPTH_SS"):
+        return "Depth"
     return None
 
 
