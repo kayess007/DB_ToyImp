@@ -12,10 +12,6 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin"]
-      interval: 5s
-      retries: 5
 
   cassandra:
     image: cassandra:4.1
@@ -28,10 +24,6 @@ services:
       - "9042:9042"   # CQL port
     volumes:
       - cassandra_data:/var/lib/cassandra
-    healthcheck:
-      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
-      interval: 10s
-      retries: 10
 
 volumes:
   pg_data:

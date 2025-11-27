@@ -1,3 +1,4 @@
+Install Docker Desktop
 Start docker
 
 Create container:
@@ -18,4 +19,12 @@ Connect to SQL Shell:
 
 Connect to Cassandra Shell:
     docker exec -it cassandra_local cqlsh
+
+Init DB:
+    Create tables: Copy and run queries in wellv1.sql
+    Create mnemonics: Copy and run queries in well_mnemonic.sql and mnemonic_name.sql
+
+For LAS File:
+    Create well manually: insert into well(uwi) values ('<YOUR_VALUE>');
+    Run las_parser.py to process the LAS file
 
