@@ -3,87 +3,58 @@ import pandas as pd
 import lasio
 from create_well import create_well
 from las_parser import process_las
-from db_connect import get_conn
+from well_query import get_las_range
+from well_query import get_las
+from well_query import get_las_metadata
 
 
-def run_query(query, params=None):
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(query, params)
-    rows = cur.fetchall()
-    colnames = [desc[0] for desc in cur.description]
-    cur.close()
-    conn.close()
-    return pd.DataFrame(rows, columns=colnames)
-
-
-def search_by_metadata():
+def search_by_metadata(uwi):
     st.subheader("Search by Metadata")
 
     col1, col2 = st.columns(2)
-    uwi = col1.text_input("UWI (Metadata)")
-    name = col2.text_input("Name")
-
+    name = col1.text_input("Name")
+    lta = col2.text_input("Land Tenure Area")
+    
     if st.button("Search Metadata"):
-        query = """
-            SELECT * FROM well
-            WHERE (%s = '' OR uwi = %s)
-              AND (%s = '' OR well_name ILIKE %s)
-        """
-        df = run_query(query, (uwi, uwi, name, f"%{name}%"))
-        st.dataframe(df)
+        get_las_metadata(uwi, name, lta)
 
 
-def search_by_params():
-    st.subheader("Search a Set of Params")
+def search_by_params(uwi):
+    st.subheader("Search by Set of Params")
 
-    col1, col2 = st.columns(2)
-    uwi = col1.text_input("UWI (Param)")
-    mnemonic = col2.text_input("Mnemonic")
+    col1 = st.columns(1)
+    mnemonics = col1[0].text_input("Mnemonics (separated by colon)")
 
     if st.button("Search Params"):
-        query = """
-            SELECT wp.uwi, cp.mnemonic, wp.row_id, wp.value
-            FROM well_curve wp
-            JOIN curve_param cp ON wp.curve_id = cp.id
-            WHERE (%s = '' OR wp.uwi = %s)
-              AND (%s = '' OR cp.mnemonic = %s)
-        """
-        df = run_query(query, (uwi, uwi, mnemonic, mnemonic))
-        st.dataframe(df)
+        get_las(uwi, [x.strip() for x in mnemonics.split(",")])
 
 
-def search_by_range():
-    st.subheader("Search by Depth Range")
+def search_by_range(uwi):
+    st.subheader("Search by Range (Depth/Time)")
 
     col1, col2, col3 = st.columns(3)
-    uwi = col1.text_input("UWI (Range)")
-    start = col2.number_input("Start Row", step=1.0)
-    stop = col3.number_input("Stop Row", step=1.0)
+    
+    mnemonic = col1.text_input("Indexed by")
+    start = col2.number_input("Start", format="%.10f")
+    stop = col3.number_input("Stop", format="%.10f")
 
     if st.button("Search Range"):
-        query = """
-            SELECT wp.uwi, cp.mnemonic, wp.row_id, wp.value
-            FROM well_curve wp
-            JOIN curve_param cp ON wp.curve_id = cp.id
-            WHERE (%s = '' OR wp.uwi = %s)
-              AND wp.row_id BETWEEN %s AND %s
-        """
-        df = run_query(query, (uwi, uwi, start, stop))
-        st.dataframe(df)
+        get_las_range(mnemonic,  start, stop, uwi)
 
 
 def search_page():
+
     st.header("Search")
+    col1 = st.columns(1)
+    uwi = col1[0].text_input("UWI")
+    st.divider()
+    search_by_metadata(uwi)
 
     st.divider()
-    search_by_metadata()
+    search_by_params(uwi)
 
     st.divider()
-    search_by_params()
-
-    st.divider()
-    search_by_range()
+    search_by_range(uwi)
 
 
 st.set_page_config(page_title="Well Management System", layout="wide")
@@ -118,7 +89,6 @@ if page == "Create Well":
             release_date = st.date_input("Release Date")
 
         submitted = st.form_submit_button("Create Well")
-
         if submitted:
             try:
                 create_well(

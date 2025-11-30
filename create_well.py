@@ -10,7 +10,7 @@ def create_well(uwi, name, re, op, lat, lon, lta, classification, datum, datum_e
         INSERT INTO well (uwi)
         VALUES (%s)
         """,
-        (uwi)
+        (uwi,)
     )
     cur.execute(
         """
@@ -24,8 +24,8 @@ def create_well(uwi, name, re, op, lat, lon, lta, classification, datum, datum_e
 
 if __name__ == "__main__":
     
-    create_well('302B164650048451', 'Hibernia B-16 2Z',	0, 'HMDC',	'''46° 45' 02.08"''','''48° 46' 54.45"''',
-    	'''Jeanne d'Arc''',	'Development', 76, 'RT', '27-Feb-2025',	'13-Jun-2025')																																	
+    create_well('302B164650048451', 'Hibernia B-16 2Z', 0, 'HMDC', '46° 45\' 02.08"', '48° 46\' 54.45"',
+     "Jeanne d'Arc", 'Development', 76.0, 'RT', '2025-11-30', '2025-11-30')																																	
 
     cur.close()
     conn.close()

@@ -6,6 +6,31 @@ from db_connect import get_conn
 conn = get_conn()
 cur = conn.cursor()
 
+def get_mnemonic_def(mnemonic_names):
+    placeholders = ",".join(["%s"] * len(mnemonic_names))
+    cur.execute(f"""
+        SELECT 
+            m.mnemonic_id,
+            mn.name,
+            m.unit,
+            m.description
+        FROM mnemonic m
+        JOIN mnemonic_name mn
+            ON m.mnemonic_id = mn.mnemonic
+        WHERE mn.name in ({placeholders})
+        ORDER BY m.mnemonic_id;
+    """, mnemonic_names)
+
+    rows = cur.fetchall()
+    mnemonic_dict = {}
+    for mnemonic_id, name, unit, desc in rows:
+        mnemonic_dict[mnemonic_id] = {
+            "name": name,    
+            "unit": unit,
+            "description": desc
+        }
+    return mnemonic_dict
+
 def get_well_metadata(uwi):
     query = f"""
         SELECT *
@@ -15,6 +40,18 @@ def get_well_metadata(uwi):
     """
     cur.execute(query, [uwi])
     return cur.fetchall()
+
+def get_well_uwi(uwi, name, lta):
+    query = f"""
+        SELECT well.uwi
+        FROM well
+        JOIN well_metadata m ON well.uwi = m.uwi
+        WHERE well.uwi = %s
+            OR m.well_name = %s
+            OR m.land_tenure_area = %s;
+    """
+    cur.execute(query, [uwi, name, lta])
+    return [row[0] for row in cur.fetchall()]
 
 def get_well_info(uwi):
     cur.execute("""
@@ -151,39 +188,22 @@ def get_curve_in_range(mnemonic, start, stop, uwi):
     cur.execute(query, [uwi] + rows)
     print(cur.fetchall())
 
-def get_las(uwi):
-    las = lasio.LASFile()
-    las.well.clear()
-    # Well Info Section
-    for item in get_well_info(uwi):
-        name = item["name"] or f"M{item['mnemonic_id']}"
-        unit = item["unit"] or ""
-        value = item["value"] or ""
-        descr = item["description"] or ""
+def get_las_range(mnemonic_name, start, stop, uwi):
+    get_curve_in_range(mnemonic_name, start, stop, uwi)
 
-        las.well.append(lasio.HeaderItem(
-            mnemonic =name,
-            value=value,
-            descr=descr,
-            unit=unit
-        ))
-
+def get_las(uwi, mnemonic_names):
+    mnemonic_dict = get_mnemonic_def(mnemonic_names)
     curve_params = get_curve_info(uwi)
-    for item in curve_params:
-        name = item["name"] or f"M{item['mnemonic_id']}"
-        unit = item["unit"] or ""
-        descr = item["description"] or ""
-
-        las.curves.append(lasio.CurveItem(
-            mnemonic =name,
-            descr=descr,
-            unit=unit
-        ))
-
     mnemonic_ids = [c["mnemonic_id"] for c in curve_params]
-    get_curve_data(uwi, mnemonic_ids)
+    selected = [m_id for m_id in mnemonic_ids if m_id in mnemonic_dict]
+    get_curve_data(uwi, selected)
 
-    return las
+def get_las_metadata(uwi, name, lta):
+    uwis = get_well_uwi(uwi, name, lta)
+    for uwi in uwis:
+        curve_params = get_curve_info(uwi)
+        mnemonic_ids = [c["mnemonic_id"] for c in curve_params]
+        get_curve_data(uwi, mnemonic_ids)
 
 if __name__ == "__main__":
     uwi = '302B164650048451'

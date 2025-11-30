@@ -1,6 +1,8 @@
 from db_connect import get_cluster
 from db_connect import get_session
 from db_connect import get_conn
+from well_query import get_well_uwi
+from well_query import get_mnemonic_def
 import bisect
 
 conn = get_conn()
@@ -29,31 +31,6 @@ def get_mnemonic_def_id(mnemonic_ids):
         where m.mnemonic_id in ({placeholders})
         ORDER BY m.mnemonic_id;
     """, mnemonic_ids)
-
-    rows = cur.fetchall()
-    mnemonic_dict = {}
-    for mnemonic_id, name, unit, desc in rows:
-        mnemonic_dict[mnemonic_id] = {
-            "name": name,    
-            "unit": unit,
-            "description": desc
-        }
-    return mnemonic_dict
-
-def get_mnemonic_def(mnemonic_names):
-    placeholders = ",".join(["%s"] * len(mnemonic_names))
-    cur.execute(f"""
-        SELECT 
-            m.mnemonic_id,
-            mn.name,
-            m.unit,
-            m.description
-        FROM mnemonic m
-        JOIN mnemonic_name mn
-            ON m.mnemonic_id = mn.mnemonic
-        WHERE mn.name in ({placeholders})
-        ORDER BY m.mnemonic_id;
-    """, mnemonic_names)
 
     rows = cur.fetchall()
     mnemonic_dict = {}
@@ -158,6 +135,15 @@ def get_las(uwi, mnemonic_names):
     curve_data = get_curve_data(uwi, total_chunks, selected)
     curve_ascii = {mnemonic_dict[mid]['name']: curve_data[mid] for mid in selected}
     print(curve_ascii)
+
+def get_las_metadata(uwi, name, lta):
+    uwis = get_well_uwi(uwi, name, lta)
+    for uwi in uwis:
+        mnemonics, chunks = get_curve_info(uwi)
+        mnemonic_dict = get_mnemonic_def_id(mnemonics)
+        curve_data = get_curve_data(uwi, chunks, mnemonics)
+        curve_ascii = {mnemonic_dict[mid]['name']: curve_data[mid] for mid in mnemonics}
+        print(curve_ascii)
 
 if __name__ == "__main__":
     uwi = '302B164650048451'
