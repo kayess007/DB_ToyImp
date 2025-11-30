@@ -90,17 +90,17 @@ def insert_curve(uwi, curves, mnemonic_dict):
     total_chunks = (num_rows + chunk_size - 1) // chunk_size
 
     insert_stmt = session.prepare("""
-        INSERT INTO curve_info (uwi, mnemonics, chunks)
-        VALUES (?, ?, ?)
+        INSERT INTO curve_info (uwi, mnemonics, chunks, chunk_size)
+        VALUES (?, ?, ?, ?)
     """)
     session.execute(
         insert_stmt,
-        (uwi, mnemonic_ids, total_chunks)
+        (uwi, mnemonic_ids, total_chunks, chunk_size)
     )
 
     insert_stmt = session.prepare("""
-        INSERT INTO curve_chunk (uwi, chunk_index, mnemonic_id, values)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO curve_chunk (uwi, chunk_index, chunk_min, chunk_max, mnemonic_id, values)
+        VALUES (?, ?, ?, ?, ?, ?)
     """)
 
     for chunk_index in range(total_chunks):
@@ -112,7 +112,7 @@ def insert_curve(uwi, curves, mnemonic_dict):
 
             session.execute(
                 insert_stmt,
-                (uwi, chunk_index, m_id, chunk_vals)
+                (uwi, chunk_index, chunk_vals[0], chunk_vals[-1], m_id, chunk_vals)
             )
 
 
