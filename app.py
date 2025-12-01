@@ -16,7 +16,11 @@ def search_by_metadata(uwi):
     lta = col2.text_input("Land Tenure Area")
     
     if st.button("Search Metadata"):
-        get_las_metadata(uwi, name, lta)
+        try:
+            get_las_metadata(uwi, name, lta)
+            st.success("Query successfully to output.txt.")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
 
 def search_by_params(uwi):
@@ -26,7 +30,11 @@ def search_by_params(uwi):
     mnemonics = col1[0].text_input("Mnemonics (separated by colon)")
 
     if st.button("Search Params"):
-        get_las(uwi, [x.strip() for x in mnemonics.split(",")])
+        try:
+            get_las(uwi, [x.strip() for x in mnemonics.split(",")])
+            st.success("Query successfully to output.txt.")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
 
 def search_by_range(uwi):
@@ -39,7 +47,11 @@ def search_by_range(uwi):
     stop = col3.number_input("Stop", format="%.10f")
 
     if st.button("Search Range"):
-        get_las_range(mnemonic,  start, stop, uwi)
+        try:
+            get_las_range(mnemonic,  start, stop, uwi)
+            st.success("Query successfully to output.txt.")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
 
 def search_page():

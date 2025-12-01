@@ -3,6 +3,10 @@ from db_connect import get_session
 from db_connect import get_conn
 from well_query import get_well_uwi
 from well_query import get_mnemonic_def
+from well_query import get_well_info
+from helper import write_well_info
+from helper import write_curve_info
+from helper import write_curve_data
 import bisect
 
 conn = get_conn()
@@ -116,34 +120,45 @@ def get_chunks(mnemonic, start, stop, uwi, chunks):
     for m in result:
         result[m] = result[m][start_idx:stop_idx]
     return result
-        
 
 def get_las_range(mnemonic_name, start, stop, uwi):
+    well_info = get_well_info(uwi)
     mnemonics, chunks = get_curve_info(uwi)
     mnemonic_dict = get_mnemonic_def_id(mnemonics)
 
     mnemonic_id = next((k for k, v in mnemonic_dict.items() if v['name'] == mnemonic_name), None)
     curve_data = get_chunks(mnemonic_id, start, stop, uwi, chunks)
     curve_ascii = {mnemonic_dict[mid]['name']: curve_data[mid] for mid in mnemonics}
-    print(curve_ascii)
+    write_well_info(well_info)
+    curve_info = get_mnemonic_def_id(mnemonics)
+    write_curve_info(list(curve_info.values()))
+    write_curve_data(list(curve_ascii.items()))
 
 
 def get_las(uwi, mnemonic_names):
+    well_info = get_well_info(uwi)
     mnemonic_dict = get_mnemonic_def(mnemonic_names)
     mnemonic_ids, total_chunks = get_curve_info(uwi)
     selected = [m_id for m_id in mnemonic_ids if m_id in mnemonic_dict]
     curve_data = get_curve_data(uwi, total_chunks, selected)
     curve_ascii = {mnemonic_dict[mid]['name']: curve_data[mid] for mid in selected}
-    print(curve_ascii)
+    write_well_info(well_info)
+    curve_info = get_mnemonic_def_id(mnemonic_ids)
+    write_curve_info(list(curve_info.values()))
+    write_curve_data(list(curve_ascii.items()))
 
 def get_las_metadata(uwi, name, lta):
     uwis = get_well_uwi(uwi, name, lta)
     for uwi in uwis:
+        well_info = get_well_info(uwi)
         mnemonics, chunks = get_curve_info(uwi)
         mnemonic_dict = get_mnemonic_def_id(mnemonics)
         curve_data = get_curve_data(uwi, chunks, mnemonics)
         curve_ascii = {mnemonic_dict[mid]['name']: curve_data[mid] for mid in mnemonics}
-        print(curve_ascii)
+        write_well_info(well_info)
+        curve_info = get_mnemonic_def_id(mnemonics)
+        write_curve_info(list(curve_info.values()))
+        write_curve_data(list(curve_ascii.items()))
 
 if __name__ == "__main__":
     uwi = '302B164650048451'
