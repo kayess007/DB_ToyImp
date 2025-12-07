@@ -1,3 +1,10 @@
+GROUP 9: WELL LOG DB RECOMMENDATION
+By:
+Dang Tran
+J Chris Pickett
+Kwame
+Arnob
+
 Install Docker Desktop
 Start docker
 
